@@ -1,0 +1,14 @@
+Changes
+LICENSE
+MANIFEST
+META.json
+META.yml
+Makefile.PL
+README
+dist.ini
+lib/Padre/Document/YAML.pm
+lib/Padre/Plugin/YAML.pm
+t/00-compile.t
+t/release-check-changes.t
+t/release-eol.t
+t/release-pod-syntax.t
