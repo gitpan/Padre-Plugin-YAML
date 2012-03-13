@@ -18,9 +18,11 @@ META.yml
 MYMETA.json
 MYMETA.yml
 padre.yml
+share/locale/Padre__Plugin__YAML-ar.mo
+share/locale/Padre__Plugin__YAML-ar.po
 t/00.load.t
 t/01-compile.t
 t/02-eol.t
-t/03-YAML.t
-t/04-Document.t
-t/05-Syntax.t
+t/03-yaml.t
+t/04-document.t
+t/05-syntax.t
