@@ -8,10 +8,9 @@ build_requires:
   Locale::Msgfmt: 0.15
   Test::More: 0.88
 configure_requires:
-  ExtUtils::MakeMaker: 6.59
-distribution_type: module
-dynamic_config: 1
-generated_by: 'Module::Install version 1.06'
+  ExtUtils::MakeMaker: 0
+dynamic_config: 0
+generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.120630'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -19,16 +18,10 @@ meta-spec:
 name: Padre-Plugin-YAML
 no_index:
   directory:
-    - inc
-    - share
     - t
+    - inc
 requires:
   Padre: 0.94
   YAML: 0.80
-  perl: 5.10.1
-resources:
-  bugtracker: http://padre.perlide.org/
-  homepage: http://padre.perlide.org/trac/wiki/PadrePluginYAML
-  license: http://dev.perl.org/licenses/
-  repository: http://svn.perlide.org/padre/trunk/Padre-Plugin-YAML
+  perl: 5.010001
 version: 0.02

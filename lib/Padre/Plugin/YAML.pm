@@ -1,40 +1,53 @@
 package Padre::Plugin::YAML;
-BEGIN {
-  $Padre::Plugin::YAML::VERSION = '0.01';
-}
 
-# ABSTRACT: YAML support for Padre
-
-use warnings;
+use 5.010001;
 use strict;
+use warnings;
 
-use File::Spec::Functions qw{ catfile };
+use Padre::Plugin ();
+use Padre::Wx     ();
 
-use base 'Padre::Plugin';
-use Padre::Wx ();
+our $VERSION = '0.02';
+use parent qw(Padre::Plugin);
 
+# Child modules we need to unload when disabled
+use constant CHILDREN => qw{
+	Padre::Plugin::YAML
+	Padre::Plugin::YAML::Document
+	Padre::Plugin::YAML::Syntax
+};
+
+#######
+# Called by padre to know the plugin name
+#######
 sub plugin_name {
-	Wx::gettext('YAML');
+	return Wx::gettext('YAML');
 }
 
+#######
+# Called by padre to check the required interface
+#######
 sub padre_interfaces {
-	'Padre::Plugin' => 0.81, 'Padre::Document' => 0.81;
+	return (
+		'Padre::Plugin'       => '0.94',
+		'Padre::Document'     => '0.94',
+		'Padre::Wx'           => '0.94',
+		'Padre::Task::Syntax' => '0.94',
+	);
 }
 
+#######
+# Called by padre to know which document to register for this plugin
+#######
 sub registered_documents {
-	'text/x-yaml' => 'Padre::Document::YAML';
+	return (
+		'text/x-yaml' => 'Padre::Plugin::YAML::Document',
+	);
 }
 
-#sub plugin_icon {
-#	my $self = shift;
-
-	# find resource path
-	#my $iconpath = catfile( $self->plugin_directory_share, 'icons', 'file.png' );
-
-	# create and return icon
-	#return Wx::Bitmap->new( $iconpath, Wx::wxBITMAP_TYPE_PNG );
-#}
-
+#######
+# Called by padre to build the menu in a simple way
+#######
 sub menu_plugins_simple {
 	my $self = shift;
 	return $self->plugin_name => [
@@ -42,9 +55,9 @@ sub menu_plugins_simple {
 	];
 }
 
-#####################################################################
-# Custom Methods
-
+#######
+# Shows the about dialog for this plugin
+#######
 sub show_about {
 	my $self = shift;
 
@@ -55,7 +68,7 @@ sub show_about {
 	my $description = Wx::gettext( <<'END' );
 YAML support for Padre
 
-Copyright 2011 %s
+Copyright 2011-2012 %s
 This plug-in is free software; you can redistribute it and/or modify it under the same terms as Padre.
 END
 	$about->SetDescription( sprintf( $description, $authors ) );
@@ -66,18 +79,39 @@ END
 	return;
 }
 
+#######
+# Called by Padre when this plugin is disabled
+#######
+sub plugin_disable {
+	my $self = shift;
+
+	# Unload all our child classes
+	# TODO: Switch to Padre::Unload once Padre 0.96 is released
+	for my $package (CHILDREN) {
+		require Padre::Unload;
+		Padre::Unload->unload($package);
+	}
+
+	$self->SUPER::plugin_disable(@_);
+
+	return 1;
+}
+
 1;
 
+__END__
 
 =pod
 
 =head1 NAME
 
-Padre::Plugin::YAML - YAML support for Padre
+Padre::Plugin::YAML - YAML support for Padre The Perl IDE
+
 
 =head1 VERSION
 
-version 0.01
+This document describes Padre::Plugin::YAML version 0.02
+
 
 =head1 DESCRIPTION
 
@@ -87,19 +121,79 @@ Environment.
 Syntax highlighting for YAML is supported by Padre out of the box.
 This plug-in adds some more features to deal with YAML files.
 
+
+=head1 DEPENDENCIES
+
+None.
+
+
+=head1 BUGS AND LIMITATIONS
+
+No bugs have been reported.
+
+
+=head1 METHODS
+
+=over 6
+
+=item * menu_plugins_simple
+
+=item * padre_interfaces
+
+=item * plugin_disable
+
+=item * plugin_name
+
+=item * registered_documents
+
+=item * show_about
+
+=back
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+  perldoc Padre::Plugin::YAML
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Padre-Plugin-YAML>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Padre-Plugin-YAML>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/Padre-Plugin-YAML>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Padre-Plugin-YAML/>
+
+=back
+
+
 =head1 AUTHOR
 
-Zeno Gantner <zenog@cpan.org>
+Zeno Gantner E<lt>zenog@cpan.orgE<gt>
 
-=head1 COPYRIGHT AND LICENSE
+=head1 CONTRIBUTORS
 
-This software is copyright (c) 2011 by Zeno Gantner.
+Kevin Dawson  E<lt>bowtie@cpan.orgE<gt>
 
-This is free software; you can redistribute it and/or modify it under
-the same terms as the Perl 5 programming language system itself.
+Ahmad M. Zawawi E<lt>ahmad.zawawi@gmail.comE<gt>
+
+=head1 LICENCE AND COPYRIGHT
+
+Copyright (c) 2011-2012, Zeno Gantner E<lt>zenog@cpan.orgE<gt>. All rights reserved.
+
+This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See L<perlartistic>.
 
 =cut
-
-
-__END__
-

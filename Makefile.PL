@@ -1,54 +1,20 @@
-
 use strict;
 use warnings;
+use inc::Module::Install;
 
+name 'Padre-Plugin-YAML';
+all_from 'lib/Padre/Plugin/YAML.pm';
 
+requires 'Padre'           => '0.94';
+requires 'YAML'            => '0.80';
+test_requires 'Test::More' => '0.88';
+test_requires 'File::Temp' => '0.22';
 
-use ExtUtils::MakeMaker 6.31;
+no_index 'directory' => qw{ t eg share inc};
+homepage 'http://padre.perlide.org/trac/wiki/PadrePluginYAML';
+bugtracker 'http://padre.perlide.org/';
+repository 'http://svn.perlide.org/padre/trunk/Padre-Plugin-YAML';
 
+install_share_with_mofiles;
 
-
-my %WriteMakefileArgs = (
-  'ABSTRACT' => 'YAML support for Padre',
-  'AUTHOR' => 'Zeno Gantner <zenog@cpan.org>',
-  'BUILD_REQUIRES' => {
-    'Locale::Msgfmt' => '0.15',
-    'Test::More' => '0'
-  },
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
-  },
-  'DISTNAME' => 'Padre-Plugin-YAML',
-  'EXE_FILES' => [],
-  'LICENSE' => 'perl',
-  'NAME' => 'Padre::Plugin::YAML',
-  'PREREQ_PM' => {
-    'Padre' => '0.85'
-  },
-  'VERSION' => '0.01',
-  'test' => {
-    'TESTS' => 't/*.t'
-  }
-);
-
-
-unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
-  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
-  my $pp = $WriteMakefileArgs{PREREQ_PM};
-  for my $mod ( keys %$br ) {
-    if ( exists $pp->{$mod} ) {
-      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
-    }
-    else {
-      $pp->{$mod} = $br->{$mod};
-    }
-  }
-}
-
-delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
-  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
-
-WriteMakefile(%WriteMakefileArgs);
-
-
-
+WriteAll;
