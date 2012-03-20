@@ -1,12 +1,12 @@
 package Padre::Plugin::YAML::Document;
 
-use 5.010001;
+use v5.10;
 use strict;
 use warnings;
 
 use Padre::Document ();
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use parent qw(Padre::Document);
 
 
@@ -39,7 +39,7 @@ Padre::Plugin::YAML::Document - YAML support for Padre The Perl IDE
 
 =head1 VERSION
 
-This document describes Padre::Plugin::YAML::Document version 0.03
+This document describes Padre::Plugin::YAML::Document version 0.04
 
 
 =head1 DESCRIPTION
@@ -56,11 +56,6 @@ Environment.
 
 Syntax highlighting for YAML is supported by Padre out of the box.
 This plug-in adds some more features to deal with YAML files.
-
-
-=head1 DEPENDENCIES
-
-None.
 
 
 =head1 BUGS AND LIMITATIONS
@@ -101,4 +96,3 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
 
 =cut
-

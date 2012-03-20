@@ -1,13 +1,14 @@
 package Padre::Plugin::YAML::Syntax;
 
-use 5.010001;
+use v5.10;
 use strict;
 use warnings;
 
+use Padre::Logger;
 use Padre::Task::Syntax ();
 use Padre::Wx           ();
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use parent qw(Padre::Task::Syntax);
 
 sub new {
@@ -32,18 +33,26 @@ sub syntax {
 	my $self = shift;
 	my $text = shift;
 
-	my $error;
+	TRACE("\n$text") if DEBUG;
+
 	eval {
-		require YAML;
-		YAML::Load($text);
+		if ( $^O =~ /Win32/i )
+		{
+			require YAML;
+			YAML::Load($text);
+		} else {
+			require YAML::XS;
+			YAML::XS::Load($text);
+		}
 	};
 	if ($@) {
+		TRACE("\nInfo: from YAML::XS::Load: $@") if DEBUG;
 		return $self->_parse_error($@);
-	} else {
-
-		# No errors...
-		return [];
 	}
+
+	# No errors...
+	return {};
+
 }
 
 sub _parse_error {
@@ -51,22 +60,50 @@ sub _parse_error {
 	my $error = shift;
 
 	my @issues = ();
-	my ( $type, $message, $code, $line ) = (
+	my ( $type, $message, $code, $line, $column ) = (
 		'Error',
 		Wx::gettext('Unknown YAML error'),
 		undef,
 		1
 	);
-	for ( split '\n', $error ) {
-		if (/YAML (\w+)\: (.+)/) {
-			$type    = $1;
-			$message = $2;
-		} elsif (/^\s+Code: (.+)/) {
+
+	# from the following in scanner.c inside YAML::XS
+	foreach ( split '\n', $error ) {
+		when (/YAML::XS::Load (\w+)\: .+/) {
+			$type = $1;
+		}
+		when (/^\s+(found.+)/) {
+			$message = $1;
+		}
+		when (/^\s+(could not.+)/) {
+			$message = $1;
+		}
+		when (/^\s+(did not.+)/) {
+			$message = $1;
+		}
+		when (/^\s+(block.+)/) {
+			$message = $1;
+		}
+		when (/^\s+(mapping.+)/) {
+			$message = $1;
+		}
+		when (/^\s+Code: (.+)/) {
 			$code = $1;
-		} elsif (/^\s+Line: (.+)/) {
-			$line = $1;
+		}
+		when (/line:\s(\d+), column:\s(\d+)/) {
+			$line   = $1;
+			$column = $2;
 		}
 	}
+
+	if (DEBUG) {
+		say "type = $type"       if $type;
+		say "message = $message" if $message;
+		say "code = $code"       if $code;
+		say "line = $line"       if $line;
+		say "column = $column"   if $column;
+	}
+
 	push @issues,
 		{
 		message => $message . ( defined $code ? " ( $code )" : q{} ),
@@ -78,7 +115,7 @@ sub _parse_error {
 	return {
 		issues => \@issues,
 		stderr => $error,
-		}
+	};
 
 }
 
@@ -97,7 +134,7 @@ Padre::Plugin::YAML::Syntax - YAML document syntax-checking in the background
 
 =head1 VERSION
 
-This document describes Padre::Plugin::YAML::Syntax version 0.03
+This document describes Padre::Plugin::YAML::Syntax version 0.04
 
 
 =head1 DESCRIPTION
@@ -107,15 +144,13 @@ the background. It inherits from L<Padre::Task::Syntax>.
 Please read its documentation.
 
 
-=head1 DEPENDENCIES
-
-None.
-
-
 =head1 BUGS AND LIMITATIONS
 
-No bugs have been reported.
+Now using YAML::XS
 
+    supports %TAG = %YAML 1.1 or no %TAG 
+
+If you receive "Unknown YAML error" please inform dev's with sample code that causes this, Thanks.
 
 =head1 METHODS
 

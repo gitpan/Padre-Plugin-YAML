@@ -17,7 +17,6 @@ MANIFEST			This list of files
 META.yml
 MYMETA.json
 MYMETA.yml
-padre.yml
 share/locale/Padre__Plugin__YAML-ar.mo
 share/locale/Padre__Plugin__YAML-ar.po
 t/00.load.t

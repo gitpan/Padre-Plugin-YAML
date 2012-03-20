@@ -22,6 +22,7 @@ no_index:
     - inc
 requires:
   Padre: 0.94
-  YAML: 0.80
-  perl: 5.010001
-version: 0.03
+  Try::Tiny: 0.11
+  YAML::XS: 0.38
+  perl: 5.010
+version: 0.04
