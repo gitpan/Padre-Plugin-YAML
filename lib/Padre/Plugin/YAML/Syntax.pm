@@ -1,19 +1,20 @@
 package Padre::Plugin::YAML::Syntax;
 
-use v5.10;
+use v5.10.1;
 use strict;
 use warnings;
 
 use Padre::Logger;
 use Padre::Task::Syntax ();
 use Padre::Wx           ();
+use Try::Tiny;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use parent qw(Padre::Task::Syntax);
 
 sub new {
 	my $class = shift;
-	$class->SUPER::new(@_);
+	return $class->SUPER::new(@_);
 }
 
 sub run {
@@ -35,28 +36,28 @@ sub syntax {
 
 	TRACE("\n$text") if DEBUG;
 
-	eval {
+	try {
 		if ( $^O =~ /Win32/i )
 		{
 			require YAML;
-			YAML::Load($text);
+			YAML::Load($text);	
 		} else {
 			require YAML::XS;
 			YAML::XS::Load($text);
 		}
-	};
-	if ($@) {
-		TRACE("\nInfo: from YAML::XS::Load: $@") if DEBUG;
-		if ( $^O =~ /Win32/i ) {
-			return $self->_parse_error_win32($@);
-		} else {
-			return $self->_parse_error($@);
-		}
+		# No errors...
+		return {};	
 	}
-
-	# No errors...
-	return {};
-
+	catch {
+		TRACE("\nInfo: from YAML::XS::Load:\n $_") if DEBUG;
+		if ( $^O =~ /Win32/i ) {
+			# send errors to syantax panel
+			return $self->_parse_error_win32($_);
+		} else {
+			# send errors to syantax panel
+			return $self->_parse_error($_);
+		}
+	};
 }
 
 sub _parse_error {
@@ -76,7 +77,10 @@ sub _parse_error {
 		when (/YAML::XS::Load (\w+)\: .+/) {
 			$type = $1;
 		}
-		when (/^\s+(found.+)/) {
+		when (/^\s+(block.+)/) {
+			$message = $1;
+		}
+		when (/^\s+(cannot.+)/) {
 			$message = $1;
 		}
 		when (/^\s+(could not.+)/) {
@@ -85,7 +89,7 @@ sub _parse_error {
 		when (/^\s+(did not.+)/) {
 			$message = $1;
 		}
-		when (/^\s+(block.+)/) {
+		when (/^\s+(found.+)/) {
 			$message = $1;
 		}
 		when (/^\s+(mapping.+)/) {
@@ -110,7 +114,9 @@ sub _parse_error {
 
 	push @issues,
 		{
-		message => $message . ( defined $code ? " ( $code )" : q{} ),
+		# YAML::XS dose not produce error codes, hence we can use defined or //
+		# message => $message . ( defined $code ? " ( $code )" : q{} ),
+		message => $message . ( $code // q{} ),
 		line => $line,
 		type => $type eq 'Error' ? 'F' : 'W',
 		file => $self->{filename},
@@ -163,7 +169,6 @@ sub _parse_error_win32 {
 
 __END__
 
-
 =pod
 
 =head1 NAME
@@ -173,7 +178,7 @@ Padre::Plugin::YAML::Syntax - YAML document syntax-checking in the background
 
 =head1 VERSION
 
-This document describes Padre::Plugin::YAML::Syntax version 0.05
+This document describes Padre::Plugin::YAML::Syntax version 0.06
 
 
 =head1 DESCRIPTION

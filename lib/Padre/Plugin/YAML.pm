@@ -1,6 +1,6 @@
 package Padre::Plugin::YAML;
 
-use v5.10;
+use v5.10.1;
 use strict;
 use warnings;
 
@@ -8,7 +8,7 @@ use Padre::Plugin ();
 use Padre::Wx     ();
 use Try::Tiny;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use parent qw(Padre::Plugin);
 
 # Child modules we need to unload when disabled
@@ -38,68 +38,96 @@ sub padre_interfaces {
 	);
 }
 
-#######
-# Called by padre to know which document to register for this plugin
-#######
-sub registered_documents {
-	return (
-		'text/x-yaml' => 'Padre::Plugin::YAML::Document',
-	);
+#########
+# We need plugin_enable
+# as we have an external dependency
+#########
+sub plugin_enable {
+	my $self                 = shift;
+	my $correct_yaml_install = 0;
+
+	# Tests for externals used by Preference's
+
+	if ( $^O =~ /Win32/i ) {
+		try {
+			if ( require YAML ) {
+				$correct_yaml_install = 1;
+			}
+		};
+	} else {
+		try {
+			if ( require YAML::XS ) {
+				$correct_yaml_install = 1;
+			}
+		};
+	}
+
+	return $correct_yaml_install;
 }
 
-#######
-# Called by padre to build the menu in a simple way
-#######
-sub menu_plugins_simple {
-	my $self = shift;
-	return $self->plugin_name => [
-		Wx::gettext('About') => sub { $self->show_about },
-	];
-}
 
 #######
-# Shows the about dialog for this plugin
+	# Called by padre to know which document to register for this plugin
 #######
-sub show_about {
-	my $self = shift;
+	sub registered_documents {
+		return (
+			'text/x-yaml' => 'Padre::Plugin::YAML::Document',
+		);
+	}
 
-	# Generate the About dialog
-	my $about = Wx::AboutDialogInfo->new;
-	$about->SetName( Wx::gettext('YAML Plug-in') );
-	my $authors     = 'Zeno Gantner';
-	my $description = Wx::gettext( <<'END' );
+#######
+	# Called by padre to build the menu in a simple way
+#######
+	sub menu_plugins_simple {
+		my $self = shift;
+		return $self->plugin_name => [
+			Wx::gettext('About') => sub { $self->show_about },
+		];
+	}
+
+#######
+	# Shows the about dialog for this plugin
+#######
+	sub show_about {
+		my $self = shift;
+
+		# Generate the About dialog
+		my $about = Wx::AboutDialogInfo->new;
+		$about->SetName( Wx::gettext('YAML Plug-in') );
+		my $authors     = 'Zeno Gantner';
+		my $description = Wx::gettext( <<'END' );
 YAML support for Padre
 
 Copyright 2011-2012 %s
 This plug-in is free software; you can redistribute it and/or modify it under the same terms as Padre.
 END
-	$about->SetDescription( sprintf( $description, $authors ) );
+		$about->SetDescription( sprintf( $description, $authors ) );
 
-	# Show the About dialog
-	Wx::AboutBox($about);
+		# Show the About dialog
+		Wx::AboutBox($about);
 
-	return;
-}
-
-#######
-# Called by Padre when this plugin is disabled
-#######
-sub plugin_disable {
-	my $self = shift;
-
-	# Unload all our child classes
-	# TODO: Switch to Padre::Unload once Padre 0.96 is released
-	for my $package (CHILDREN) {
-		require Padre::Unload;
-		Padre::Unload->unload($package);
+		return;
 	}
 
-	$self->SUPER::plugin_disable(@_);
+#######
+	# Called by Padre when this plugin is disabled
+#######
+	sub plugin_disable {
+		my $self = shift;
 
-	return 1;
-}
+		# Unload all our child classes
+		# TODO: Switch to Padre::Unload once Padre 0.96 is released
+		for my $package (CHILDREN) {
+			require Padre::Unload;
+			Padre::Unload->unload($package);
+		}
 
-1;
+		$self->SUPER::plugin_disable(@_);
+
+		return 1;
+	}
+
+	1;
 
 __END__
 
@@ -112,7 +140,7 @@ Padre::Plugin::YAML - YAML support for Padre The Perl IDE
 
 =head1 VERSION
 
-This document describes Padre::Plugin::YAML version 0.05
+This document describes Padre::Plugin::YAML version 0.06
 
 
 =head1 DESCRIPTION
@@ -123,7 +151,10 @@ Environment.
 Syntax highlighting for YAML is supported by Padre out of the box.
 This plug-in adds some more features to deal with YAML files.
 
+=head2 Example
 
+Example is not revelant as this is a Padre::Plugin
+ 
 =head1 BUGS AND LIMITATIONS
 
 No bugs have been reported.
@@ -136,6 +167,8 @@ No bugs have been reported.
 =item * menu_plugins_simple
 
 =item * padre_interfaces
+
+=item * plugin_enable
 
 =item * plugin_disable
 
