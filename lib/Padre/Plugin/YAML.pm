@@ -1,6 +1,6 @@
 package Padre::Plugin::YAML;
 
-use v5.10.1;
+use v5.10;
 use strict;
 use warnings;
 
@@ -8,7 +8,7 @@ use Padre::Plugin ();
 use Padre::Wx     ();
 use Try::Tiny;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use parent qw(Padre::Plugin);
 
 # Child modules we need to unload when disabled
@@ -135,12 +135,12 @@ __END__
 
 =head1 NAME
 
-Padre::Plugin::YAML - YAML support for Padre The Perl IDE
+Padre::Plugin::YAML - YAML support for Padre, The Perl IDE.
 
 
 =head1 VERSION
 
-This document describes Padre::Plugin::YAML version 0.06
+This document describes Padre::Plugin::YAML version 0.07
 
 
 =head1 DESCRIPTION

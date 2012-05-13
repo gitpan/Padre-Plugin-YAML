@@ -1,5 +1,4 @@
 Changes
-Debian_CPANTS.txt
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -28,13 +27,3 @@ t/03-podcoverage.t
 t/04-yaml.t
 t/05-document.t
 t/06-syntax.t
-xt/changes.t
-xt/critic.t
-xt/distmanifest.t
-xt/eol.t
-xt/hasversion.t
-xt/kwalitee.t
-xt/meta.t
-xt/minimumversion.t
-xt/pod.t
-xt/podcoverage.t
